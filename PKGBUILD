@@ -7,14 +7,15 @@
 # Contributor: Judd Vinet <jvinet@zeroflux.org>
 
 pkgname=gnupg
-pkgver=2.4.3
-pkgrel=2
+pkgver=2.4.4
+pkgrel=1
 pkgdesc='Complete and free implementation of the OpenPGP standard'
 arch=(x86_64)
 url='https://www.gnupg.org/'
 license=(
   BSD-2-Clause
   BSD-3-Clause
+  BSD-4-Clause
   CC0-1.0
   GPL-2.0-or-later
   GPL-3.0-or-later
@@ -58,9 +59,8 @@ source=(
   $pkgname-2.4-revert_default_rfc4880bis.patch  # v5 is incompatible with other implementations and v6
   $pkgname-2.4-keep-systemd-support.patch
   $pkgname-2.4-keyboxd-systemd-support.patch
-  $pkgname-2.4.3-fix_tpm2d_keytotpm_handling.patch
 )
-sha256sums=('a271ae6d732f6f4d80c258ad9ee88dd9c94c8fdc33c3e45328c4d7c126bd219d'
+sha256sums=('67ebe016ca90fa7688ce67a387ebd82c6261e95897db7b23df24ff335be85bc6'
             'SKIP'
             '80a3a80f9f1f337da555a6838483e1baca44cde8a8a3d8c4ba7743626304b981'
             '8374255ce93a3c343019ab425963bcbc41982ea89e669d1ad1df0aa7be810de1'
@@ -84,9 +84,8 @@ sha256sums=('a271ae6d732f6f4d80c258ad9ee88dd9c94c8fdc33c3e45328c4d7c126bd219d'
             '6ade15b536c50a88efc2d9dc958433b0ccfaf2908025b7672753e6bfce51c3c6'
             'ef2267eecd9eb59bbbbdb97d55cbfe10236b4979a125c6683a840830bc202905'
             '677ca409e8ece61e64a94102a2b71ec119941b5ae0f0ed4f1c4f2c0c2bdd158a'
-            'e0aff9f80abb6059e41cb3bb7cc86b7aa3fc1c27626676385c5479d69ef830a1'
-            'dc5958a1d183f786e2413b53d0ad548a255c984a3d68b8e38b3d8704e071bb87')
-b2sums=('b7f4f5e548ec6dfc89cf8792f507ee8642e8500692998cf8d2edc9f5d8002904d24a714b9caffabee6094707c4595e0f54197535135622a7a32aa772f5818f28'
+            'e0aff9f80abb6059e41cb3bb7cc86b7aa3fc1c27626676385c5479d69ef830a1')
+b2sums=('02661e89f0358be09fa3e71e7235b764a7dbda62a48a0c8c7a4e6c9919c3b37d54ead50b930af58f8f2fdb87861b849d3f3751e95cbedf46bdfd76caa90c4db4'
         'SKIP'
         '7a3af856305eb4b00929aaf029dd4e5c84376df4f30add76976b9b058addf6fc4d8c39335fc83d11493ea9d8a40f0510dbac8572b99a8c8b9b3a4eca8e585774'
         'ee51a4702715f5ec2629ff42eeba8630010da8a67545d1e53961e710de5faf197708e55d2d55796917a134ca2a76b1d6c88a8f7756d0706e0cbc33b605f52d86'
@@ -110,8 +109,7 @@ b2sums=('b7f4f5e548ec6dfc89cf8792f507ee8642e8500692998cf8d2edc9f5d8002904d24a714
         '0b9546c102724f1dbb90ad3c45307eed3491a5ea79940eba1184e6d466f399f279a23e73bac6b0bb0d662aa4599d0a4a0f331b0df3fe7fa6e7590c1074fc2ed1'
         '009c1a935021c987cd3c15581250090edfcd1a6dd30622db2701295f047384e03ba97590ca6993d410e81a6fd7c274468cd58a1904d51f432d572df39ee178d6'
         '2801ecc6db1f6fe33a8a83756b272d9f363509c5804c501045002e9ac509fc22bcb16dfd107bcbe870756748d2ebc2dbdc3b7c0f74c8b7f52207553ca5e0145b'
-        '070aaca7cd1a5f994eeb84ac2b07d6ddd80b5cb21dec4d0763ab599f3849611143314faa5af7f1eb2cfb924dd49e44ec11b28763aa1980f61e74cdf368bed545'
-        '44878169d79fced289169658c133fcd9d0a16b1021c4c9fa9cfeb518a7569fec56b196524282163e9d003093e79b5cdad6779324fd1c5ab9bcb71aff7fdcadb5')
+        '070aaca7cd1a5f994eeb84ac2b07d6ddd80b5cb21dec4d0763ab599f3849611143314faa5af7f1eb2cfb924dd49e44ec11b28763aa1980f61e74cdf368bed545')
 validpgpkeys=(
   '5B80C5754298F0CB55D8ED6ABCEF7E294B092E28' # Andre Heinecke (Release Signing Key)
   '6DAA6E64A76D2840571B4902528897B826403ADA' # Werner Koch (dist signing 2020)
@@ -133,6 +131,12 @@ prepare() {
 
   # improve reproducibility
   rm doc/gnupg.info*
+
+  sed -n '5, 28 p' COPYING.other > MIT.txt
+  sed -n '30, 60 p' COPYING.other > BSD-4-Clause.txt
+  sed -n '62, 92 p' COPYING.other > BSD-3-Clause.txt
+  sed -n '95, 125 p' COPYING.other > BSD-2-Clause.txt
+  sed -n '128, 160 p' COPYING.other > Unicode-TOU.txt
 
   ./autogen.sh
 }
@@ -162,7 +166,7 @@ package() {
   ln -s gpg "$pkgdir"/usr/bin/gpg2
   ln -s gpgv "$pkgdir"/usr/bin/gpgv2
 
-  install -Dm 644 COPYING.{CC0,other} -t "$pkgdir/usr/share/licenses/$pkgname/"
+  install -vDm 644 {BSD-{2,3,4}-Clause,MIT,Unicode-TOU}.txt -t "$pkgdir/usr/share/licenses/$pkgname/"
 
   local systemdir="$pkgdir/usr/lib/systemd/"
   local wantsdir="${systemdir}user/sockets.target.wants/"
