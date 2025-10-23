@@ -202,6 +202,7 @@ prepare() {
 
 build() {
   local configure_options=(
+    --enable-g13
     --enable-large-secmem  # prerequisite for large RSA keys
     --enable-maintainer-mode
     --libexecdir=/usr/lib/gnupg
