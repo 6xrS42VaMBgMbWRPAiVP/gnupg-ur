@@ -633,10 +633,10 @@ jobs:
       - name:
           Installs latest stable Fur.
         run: |
-          cd \
-            "${HOME}/fur-src"
           /entrypoint.sh \
             make \
+              -C \
+                "${HOME}/fur-src" \
               PREFIX="/usr" \
               install 
       - name:
