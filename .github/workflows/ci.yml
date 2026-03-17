@@ -1230,6 +1230,21 @@ jobs:
             -R \
             "user:user" \
             "$(pwd)"
+      - name:
+          Installs latest stable Fur.
+        run: |
+          git \
+            clone \
+              --branch="main" \
+              --single-branch \
+              --depth=1 \
+              "https://github.com/themartiancompany/fur" \
+              "${HOME}/fur-src"
+          cd \
+            "${HOME}/fur-src"
+          make \
+            PREFIX="/usr" \
+            install 
       # - name:
       #     Gets the actual repo source because somehow it is missing for this container.
       #   run: |
@@ -1253,6 +1268,16 @@ jobs:
               jq \
               "${_pkgs[@]}" \
               --overwrite="*"
+          bash \
+            "${HOME}/fur-src/fur/fur" \
+              -v \
+              -t \
+                "ci" \
+              -m \
+                "github" \
+              -p \
+                "pacman" \
+              "libassuan"
       - name:
           Builds the package.
         run: |
@@ -1357,7 +1382,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-gcc
             python-docutils
       - name:
-          Upgrade Arch environment.
+          Upgrade MinGW environment.
         run: |
           pacman \
             -Syu \
@@ -1381,13 +1406,13 @@ jobs:
       #     -R \
       #     "user:user" \
       #     "$(pwd)"
-      - name:
-          Installs Rust.
-        run: |
-          pacman \
-            -Ss \
-            --noconfirm \
-            cargo
+      # - name:
+      #     Installs Rust.
+      #   run: |
+      #     pacman \
+      #       -Ss \
+      #       --noconfirm \
+      #       cargo
       - name:
           Fixes CRLF on Windows.
         run: |
