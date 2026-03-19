@@ -1277,6 +1277,18 @@ jobs:
             "user:user" \
             "$(pwd)"
       - name:
+          Installs latest Reallymakepkg.
+        run: |
+          git \
+            clone \
+              "https://github.com/themartiancompany/reallymakepkg" \
+              "${HOME}/reallymakepkg-src" || \
+            true
+          make \
+            -C \
+              "${HOME}/reallymakepkg-src" \
+            install
+      - name:
           Installs latest Fur.
         run: |
           git \
@@ -1504,6 +1516,18 @@ jobs:
             install-scripts
           cd \
            ".."
+      - name:
+          Installs latest Reallymakepkg.
+        run: |
+          git \
+            clone \
+              "https://github.com/themartiancompany/reallymakepkg" \
+              "${HOME}/reallymakepkg-src" || \
+            true
+          make \
+            -C \
+              "${HOME}/reallymakepkg-src" \
+            install
       - name:
           Installs latest Fur.
         run: |
