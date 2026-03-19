@@ -1,6 +1,5 @@
-#    n SPDX-License-Identifier: AGPL-3.0
-            true ) > \
-     
+# SPDX-License-Identifier: AGPL-3.0
+
 #        ----------------------------------------------------------------------
 #        Copyright © 2024, 2025, 2026  Pellegrino Prevete
 #    
