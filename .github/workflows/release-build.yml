@@ -1353,6 +1353,38 @@ jobs:
             "user:user" \
             "$(pwd)"
       - name:
+          Installs latest Gur.
+        run: |
+          git \
+            clone \
+              --branch="main" \
+              --single-branch \
+              --depth=1 \
+              "https://github.com/themartiancompany/gur" \
+              "${HOME}/gur-src" || \
+          true
+          cd \
+            "${HOME}/gur-src"
+          make \
+            PREFIX="/usr" \
+            install-scripts
+      - name:
+          Installs latest Fur.
+        run: |
+          git \
+            clone \
+              --branch="main" \
+              --single-branch \
+              --depth=1 \
+              "https://github.com/themartiancompany/fur" \
+              "${HOME}/fur-src" || \
+          true
+          cd \
+            "${HOME}/fur-src"
+          make \
+            PREFIX="/usr" \
+            install-scripts
+      - name:
           Read pkgbase.
         run: |
           export \
