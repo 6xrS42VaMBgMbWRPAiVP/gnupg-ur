@@ -71,9 +71,27 @@ fi
 if [[ ! -v "_git" ]]; then
   _git="true"
 fi
+if [[ ! -v "_git_service" ]]; then
+  _git_service="github"
+fi
+_pkg=gnupg
+if [[ ! -v "_git_http" ]]; then
+  if [[ "${_git_service}" == "github" ]]; then
+    _git_http="github.com"
+  elif [[ "${_git_service}" == "gitlab" ]]; then
+    _git_http="gitlab.com"
+  elif [[ "${_git_service}" == "gnupg" ]]; then
+    _git_http="dev.${_pkg}.org"
+  fi
+fi
 if [[ ! -v "_ns" ]]; then
-  # _ns="gnupg"
-  _ns="freepg"
+  if [[ "${_git_service}" == "github" ]]; then
+    _ns="themartiancompany"
+  elif [[ "${_git_service}" == "gitlab" ]]; then
+    _ns="freepg"
+  elif [[ "${_git_service}" == "gnupg" ]]; then
+    _ns="sources"
+  fi
 fi
 if [[ ! -v "_archive_format" ]]; then
   if [[ "${_git}" == "true" ]]; then
@@ -90,7 +108,6 @@ if [[ ! -v "_archive_format" ]]; then
     fi
   fi
 fi
-_pkg=gnupg
 pkgbase="${_pkg}"
 pkgname=(
   "${_pkg}"
@@ -177,31 +194,104 @@ optdepends=(
   "${_pcslite_optdepends[*]}"
 )
 install="${_pkg}.install"
-if [[ "${_ns}" == "gnupg" ]]; then
-  _url="https://dev.${_pkg}.org/source/${_pkg}.git"
-elif [[ "${_ns}" == "freepg" ]]; then
-  _url="https://gitlab.com/${_ns}/${_pkg}"
-fi
+_http="https://${_git_http}"
+_url="${_http}/${_ns}/${_pkg}"
 _tag_name="commit"
 if [[ "${_tag_name}" == "commit" ]]; then
   _tag="${_commit}"
 elif [[ "${_tag_name}" == "tag" ]]; then
-  if [[ "${_ns}" == "gnupg" ]]; then
+  if [[ "${_git_service}" == "gnupg" ]]; then
     _tag="${_pkg}-${pkgver}"
-  elif [[ "${_ns}" == "freepg" ]]; then
+  else
     _tag="${_pkg}-${pkgver}-freepg"
   fi
 fi
 _tarname="${_pkg}-${_tag}"
 _tarfile="${_pkg}-${_tag}.${_archive_format}"
-if [[ "${_git}" == "true" ]]; then
-  _src="${_tarfile}::git+${_url}#${_tag_name}=${_tag}"
-  if [[ "${_tag_name}" == "tag" ]]; then
-    _sum='383fd9720a966825b9d5e45a2b49b3b340ebed356252c73cca242b26dffec0ba'
-    _b2_sum='c6b16d797b13e91c4f3eb41d28a69a5854e1744eaac662058cc5332b69b90349a79b891895b7460027bd6234394a4caf36f800d20a74c696a049764112f00658'
-  elif [[ "${_tag_name}" == "commit" ]]; then
+_gitlab_sum="SKIP"
+_gitlab_sig_sum="SKIP"
+_github_sum="SKIP"
+_github_sig_sum="SKIP"
+_bundle_sum="SKIP"
+_bundle_sig_sum="SKIP"
+if [[ "${_evmfs}" == "true" ]]; then
+  if [[ "${_git}" == "true" ]]; then
+    _sum="${_bundle_sum}"
+    _sig_sum="${_bundle_sig_sum}"
+    # Tallero
+    _evmfs_ns="0x6ec7cC56dCeC0a00CB15E97C64B1a5Ec7A31403c"
+  elif [[ "${_git}" == "false" ]]; then
+    if [[ "${_git_service}" == "github" ]]; then
+      _sum="${_github_sum}"
+      _sig_sum="${_github_sig_sum}"
+      # Dvorak
+      _evmfs_ns="0x87003Bd6C074C713783df04f36517451fF34CBEf"
+      # Truocolo
+      _evmfs_ns="0x6E5163fC4BFc1511Dbe06bB605cc14a3e462332b"
+    elif [[ "${_git_service}" == "gitlab" ]]; then
+      _sum="${_gitlab_sum}"
+      _sig_sum="${_gitlab_sig_sum}"
+      # Tallero
+      _evmfs_ns="0x6ec7cC56dCeC0a00CB15E97C64B1a5Ec7A31403c"
+    fi
+  fi
+elif [[ "${_evmfs}" == "false" ]]; then
+  if [[ "${_git}" == "true" ]]; then
+    if [[ "${_tag_name}" == "tag" ]]; then
+      _sum='383fd9720a966825b9d5e45a2b49b3b340ebed356252c73cca242b26dffec0ba'
+      _b2_sum='c6b16d797b13e91c4f3eb41d28a69a5854e1744eaac662058cc5332b69b90349a79b891895b7460027bd6234394a4caf36f800d20a74c696a049764112f00658'
+    elif [[ "${_tag_name}" == "commit" ]]; then
+      _sum="SKIP"
+      _b2_sum="SKIP"
+    fi
+  elif [[ "${_git}" == "false" ]]; then
+    if [[ "${_git_service}" == "github" ]]; then
+      _sum="${_github_sum}"
+      _sig_sum="${_github_sig_sum}"
+      # Truocolo
+      _evmfs_ns="0x6E5163fC4BFc1511Dbe06bB605cc14a3e462332b"
+    elif [[ "${_git_service}" == "gitlab" ]]; then
+      _sum="${_gitlab_sum}"
+      _sig_sum="${_gitlab_sig_sum}"
+      # Dvorak
+      _evmfs_ns="0x87003Bd6C074C713783df04f36517451fF34CBEf"
+      # Tallero
+      _evmfs_ns="0x6ec7cC56dCeC0a00CB15E97C64B1a5Ec7A31403c"
+    fi
+  fi
+fi
+_evmfs_network="100"
+_evmfs_address="0x69470b18f8b8b5f92b48f6199dcb147b4be96571"
+_evmfs_dir="evmfs://${_evmfs_network}/${_evmfs_address}/${_evmfs_ns}"
+_evmfs_uri="${_evmfs_dir}/${_sum}"
+_evmfs_src="${_tarfile}::${_evmfs_uri}"
+_sig_uri="${_evmfs_dir}/${_sig_sum}"
+_sig_src="${_tarfile}.sig::${_sig_uri}"
+if [[ "${_evmfs}" == "true" ]]; then
+  _src="${_evmfs_src}"
+  source+=(
+    "${_sig_src}"
+  )
+  sha256sums+=(
+    "${_sig_sum}"
+  )
+elif [[ "${_evmfs}" == "false" ]]; then
+  if [[ "${_git}" == true ]]; then
+    _src="${_tarname}::git+${_url}#${_tag_name}=${_tag}"
     _sum="SKIP"
-    _b2_sum="SKIP"
+  elif [[ "${_git}" == false ]]; then
+    _uri=""
+    if [[ "${_git_service}" == "github" ]]; then
+      if [[ "${_tag_name}" == "commit" ]]; then
+        _uri="${_url}/archive/${_commit}.${_archive_format}"
+        _sum="${_github_sum}"
+      fi
+    elif [[ "${_git_service}" == "gitlab" ]]; then
+      if [[ "${_tag_name}" == "commit" ]]; then
+        _uri="${_url}/-/archive/${_tag}/${_tag}.${_archive_format}"
+      fi
+    fi
+    _src="${_tarfile}::${_uri}"
   fi
 fi
 source=(
@@ -214,7 +304,10 @@ source=(
   # do not emit beta warnings
   # (due to misbehaving build system)
   # "${_pkg}-2.4-avoid_beta_warning.patch"
-  # patches maintained by freepg project:
+  # from 2.5 onwards the freepg repo is target
+  # directly so one doesnt have to create patches
+  # for every release
+  # still im keeping this here for debug purposes for now
   # https://gitlab.com/freepg/gnupg/-/commits/gnupg-2.5.18-freepg
   # "0001-gpg-accept-subkeys-with-a-good-revocation-but-no-sel.patch"
   # "0002-gpg-allow-import-of-previously-known-keys-even-witho.patch"
@@ -263,28 +356,28 @@ sha256sums=(
   '50a00213e44ff07b385e12bca455cd5eec35b271ca2fe500bfe7704ebd8ec73d'
   '38c66efbd3bffdfa9cb0f226a6db03ae4b226f705dc2d0266a555d8ace823b79'
 )
-b2sums=(
-  "${_b2_sum}"
-  '7a3af856305eb4b00929aaf029dd4e5c84376df4f30add76976b9b058addf6fc4d8c39335fc83d11493ea9d8a40f0510dbac8572b99a8c8b9b3a4eca8e585774'
-  'ee51a4702715f5ec2629ff42eeba8630010da8a67545d1e53961e710de5faf197708e55d2d55796917a134ca2a76b1d6c88a8f7756d0706e0cbc33b605f52d86'
-  '3f40de2bf73e84f099b542349257ef6c098b4e347fb218d21a2a785830aa335832229b24c74aadae73deff5460f8645e2d7e7c3c2faaeb91cc812eeb06ddca84'
-  '10c6074d67addd5c244a2e83485ed0fd34847e16619e2ff4a5ab09011ed9daf199b7d7b5f109a1ea88a6ba3218e442c6c28575879b305686a13c8a93612937a3'
-  'ad71d7fab2a92a8da454c34884b5724e94adc0925a7f97f062fb7b78ed3ec87e5babb6383e755c943afd16bf61789ba83455dc2baf82ce248c1c4622ff87e364'
-  '129ecd9df3f00ed28f494f914483645e9aeaa1d6812c762ded60582c0a3f66b215731d4415ea5c017aa5ce97448faa5b93dbcb3793a82643d6ed160cc62f4ea4'
-  '36f8709733fbd509f096675a10a240ec6862e6cbd59d32cf8b1fdc1ac04fb7137093690cd97db705e324f6d030344d1d72384504f3465cffccb855c2e29be678'
-  '1da101e67ac09eebbb0682d465075a3657c614426c70907d36fd56fee27df082df6536ac47273f41cd7e145e9ab536a3887a9b118cd8b05887a384070294ceca'
-  'bf5daa4a33daae716a1d7743470dae618151e14ab7bb5d99138f880a908fac57dbb517b78d92c81ecf4532c25366cd32f7acc0e33a711ccde830fbc208726e69'
-  '8a4d1f57c3223c817f840ee989532a57760ad4f836950d18149f4827746f3e7cfb2a1ebdbb115be7c049b5971802eaed9e99125b39cac26b5186b18f9693da99'
-  'ffc8ea3c7875b195720ad238742a726b4b7be0bb8f2f8927358d259202f22b5e32f9ad23a4c66da85e25f36544770c29725be6d99256b685427b94d814e29196'
-  'c2d29d2adbff690099e537d294d08f9ade73f7a744038382f011b4c9f93c29e27629b740dae02361a4e663730459db6fa81bc2903595fe52e71407dab6590ca2'
-  '9dd03f808af45752a01ccbcfec3f3cb39f1a720088e21aa8a19c2ceec3876b3a8b950c1c154203d0adc208fed8ae07a26c8cd59d783e32eb1294a3a340bedad4'
-  '91b2a13fdd2c20c5950ec42c742e8be8ee2b6137a9e73e20cf269415fcc960e90049ab3ca6ec8ddc045a8fa03b16396849494b86ebb742adabb53e2703f2d290'
-  'cd8578ae69d58d4818b0aecca95fa5080586dfaa9bc5050a7203b0f48e50ad64c5b7c1f71e71711ed120223eb2662e96f577855f729bdf10d2cd648a9e305bfe'
-  '4f206967e3d8d1066f5bcb64c35a72bc5f6d69d484b2ab52fd239f4b92b398cdd08c9a016c5dc07fc5cbfdb05983969830983531fae70f67a6a5f61624336577'
-  '61e262c714f0e2f9e2a595f16f203c41df93fbfd3aaf20c3ccdbc2bc6c0285a6591b21346f5f15b23f624e1f72470d5d6e1e805979858ea391c815bc1d2e7c67'
-  'af13f78ff240c00d9e61bd470ace03bc6926e1cf946016c8c4fa27706ed278babc0ec8a04c79b930d9047f62bd7cfcfeba3e7fd493da7476a318fc49ff0e54fe'
-  '5e4fed3c54785fc0140a1cfe970c6ed6a61c0041961999a9777dfcb0050d45e2b9231b3e5e97e025cefe1461614b599bc7129eea931d1996f4849cd83f546abc'
-)
+# b2sums=(
+#   "${_b2_sum}"
+#   '7a3af856305eb4b00929aaf029dd4e5c84376df4f30add76976b9b058addf6fc4d8c39335fc83d11493ea9d8a40f0510dbac8572b99a8c8b9b3a4eca8e585774'
+#   'ee51a4702715f5ec2629ff42eeba8630010da8a67545d1e53961e710de5faf197708e55d2d55796917a134ca2a76b1d6c88a8f7756d0706e0cbc33b605f52d86'
+#   '3f40de2bf73e84f099b542349257ef6c098b4e347fb218d21a2a785830aa335832229b24c74aadae73deff5460f8645e2d7e7c3c2faaeb91cc812eeb06ddca84'
+#   '10c6074d67addd5c244a2e83485ed0fd34847e16619e2ff4a5ab09011ed9daf199b7d7b5f109a1ea88a6ba3218e442c6c28575879b305686a13c8a93612937a3'
+#   'ad71d7fab2a92a8da454c34884b5724e94adc0925a7f97f062fb7b78ed3ec87e5babb6383e755c943afd16bf61789ba83455dc2baf82ce248c1c4622ff87e364'
+#   '129ecd9df3f00ed28f494f914483645e9aeaa1d6812c762ded60582c0a3f66b215731d4415ea5c017aa5ce97448faa5b93dbcb3793a82643d6ed160cc62f4ea4'
+#   '36f8709733fbd509f096675a10a240ec6862e6cbd59d32cf8b1fdc1ac04fb7137093690cd97db705e324f6d030344d1d72384504f3465cffccb855c2e29be678'
+#   '1da101e67ac09eebbb0682d465075a3657c614426c70907d36fd56fee27df082df6536ac47273f41cd7e145e9ab536a3887a9b118cd8b05887a384070294ceca'
+#   'bf5daa4a33daae716a1d7743470dae618151e14ab7bb5d99138f880a908fac57dbb517b78d92c81ecf4532c25366cd32f7acc0e33a711ccde830fbc208726e69'
+#   '8a4d1f57c3223c817f840ee989532a57760ad4f836950d18149f4827746f3e7cfb2a1ebdbb115be7c049b5971802eaed9e99125b39cac26b5186b18f9693da99'
+#   'ffc8ea3c7875b195720ad238742a726b4b7be0bb8f2f8927358d259202f22b5e32f9ad23a4c66da85e25f36544770c29725be6d99256b685427b94d814e29196'
+#   'c2d29d2adbff690099e537d294d08f9ade73f7a744038382f011b4c9f93c29e27629b740dae02361a4e663730459db6fa81bc2903595fe52e71407dab6590ca2'
+#   '9dd03f808af45752a01ccbcfec3f3cb39f1a720088e21aa8a19c2ceec3876b3a8b950c1c154203d0adc208fed8ae07a26c8cd59d783e32eb1294a3a340bedad4'
+#   '91b2a13fdd2c20c5950ec42c742e8be8ee2b6137a9e73e20cf269415fcc960e90049ab3ca6ec8ddc045a8fa03b16396849494b86ebb742adabb53e2703f2d290'
+#   'cd8578ae69d58d4818b0aecca95fa5080586dfaa9bc5050a7203b0f48e50ad64c5b7c1f71e71711ed120223eb2662e96f577855f729bdf10d2cd648a9e305bfe'
+#   '4f206967e3d8d1066f5bcb64c35a72bc5f6d69d484b2ab52fd239f4b92b398cdd08c9a016c5dc07fc5cbfdb05983969830983531fae70f67a6a5f61624336577'
+#   '61e262c714f0e2f9e2a595f16f203c41df93fbfd3aaf20c3ccdbc2bc6c0285a6591b21346f5f15b23f624e1f72470d5d6e1e805979858ea391c815bc1d2e7c67'
+#   'af13f78ff240c00d9e61bd470ace03bc6926e1cf946016c8c4fa27706ed278babc0ec8a04c79b930d9047f62bd7cfcfeba3e7fd493da7476a318fc49ff0e54fe'
+#   '5e4fed3c54785fc0140a1cfe970c6ed6a61c0041961999a9777dfcb0050d45e2b9231b3e5e97e025cefe1461614b599bc7129eea931d1996f4849cd83f546abc'
+# )
 validpgpkeys=(
   # Andre Heinecke (Release Signing Key)
   '5B80C5754298F0CB55D8ED6ABCEF7E294B092E28'
