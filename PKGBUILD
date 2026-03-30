@@ -214,6 +214,8 @@ _github_sum="c39042db96a85b64834c479e69a6f3481e92a44b0dde756634a231fbbb4a99e6"
 _github_sig_sum="0f2a92ea1f158233a6b1562e9caec66ad91eaa446b03ecaa235d911c4c8774ef"
 _bundle_sum="SKIP"
 _bundle_sig_sum="SKIP"
+# Dvorak
+_evmfs_ns="0x87003Bd6C074C713783df04f36517451fF34CBEf"
 if [[ "${_evmfs}" == "true" ]]; then
   if [[ "${_git}" == "true" ]]; then
     _sum="${_bundle_sum}"
