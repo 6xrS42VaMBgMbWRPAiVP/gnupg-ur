@@ -147,7 +147,7 @@ _2_5_18_commit="1b8362889a522bbcfeb80ef3af61218db216f62b"
 _2_5_18_freepg_commit="756502e158cc2742a956333997037f72ee5ff40f"
 _commit="${_2_5_18_freepg_commit}"
 _libassuan_pkgver="3.0.2"
-pkgrel=54
+pkgrel=55
 _pkgdesc=(
   'Complete and free implementation'
   'of the OpenPGP standard.'
@@ -265,19 +265,24 @@ if [[ "${_evmfs}" == "true" ]]; then
     # Tallero
     # _evmfs_ns="0x6ec7cC56dCeC0a00CB15E97C64B1a5Ec7A31403c"
   elif [[ "${_git}" == "false" ]]; then
-    if [[ "${_git_service}" == "github" ]]; then
-      _sum="${_github_sum}"
-      _sig_sum="${_github_sig_sum}"
-      # Dvorak
-      # _evmfs_ns="0x87003Bd6C074C713783df04f36517451fF34CBEf"
-      # Truocolo
-      # _evmfs_ns="0x6E5163fC4BFc1511Dbe06bB605cc14a3e462332b"
-    elif [[ "${_git_service}" == "gitlab" ]]; then
-      _sum="${_gitlab_sum}"
-      _sig_sum="${_gitlab_sig_sum}"
-      # Tallero
-      # _evmfs_ns="0x6ec7cC56dCeC0a00CB15E97C64B1a5Ec7A31403c"
-    fi
+    echo \
+      "AHAH." \
+      1>&2
+    exit \
+      1
+    # if [[ "${_git_service}" == "github" ]]; then
+    #   _sum="${_github_sum}"
+    #   _sig_sum="${_github_sig_sum}"
+    #   # Dvorak
+    #   # _evmfs_ns="0x87003Bd6C074C713783df04f36517451fF34CBEf"
+    #   # Truocolo
+    #   # _evmfs_ns="0x6E5163fC4BFc1511Dbe06bB605cc14a3e462332b"
+    # elif [[ "${_git_service}" == "gitlab" ]]; then
+    #   _sum="${_gitlab_sum}"
+    #   _sig_sum="${_gitlab_sig_sum}"
+    #   # Tallero
+    #   # _evmfs_ns="0x6ec7cC56dCeC0a00CB15E97C64B1a5Ec7A31403c"
+    # fi
   fi
 elif [[ "${_evmfs}" == "false" ]]; then
   if [[ "${_git}" == "true" ]]; then
