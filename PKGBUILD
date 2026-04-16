@@ -147,7 +147,7 @@ _2_5_18_commit="1b8362889a522bbcfeb80ef3af61218db216f62b"
 _2_5_18_freepg_commit="756502e158cc2742a956333997037f72ee5ff40f"
 _commit="${_2_5_18_freepg_commit}"
 _libassuan_pkgver="3.0.2"
-pkgrel=60
+pkgrel=61
 _pkgdesc=(
   'Complete and free implementation'
   'of the OpenPGP standard.'
@@ -447,8 +447,51 @@ elif [[ "${_ns}" == "freepg" ]]; then
   )
 fi
 
+_android_fix() {
+  local \
+    _bash_files=() \
+    _bin_files=() \
+    _usr_bin_files=()
+  termux-fix-shebang \
+    "./autogen.sh"
+  mapfile \
+    -d \
+    $'\n' \
+    _bin_files < \
+    <(grep \
+        -rl \
+        '#!/bin' \
+        "${PWD}" || \
+      true)
+  mapfile \
+    -d \
+    $'\n' \
+    _usr_bin_files < \
+    <(grep \
+        -rl \
+        '#!/usr/bin' \
+        "${PWD}" || \
+      true)
+  _bash_files+=(
+    "${_bin_files[@]}"
+    "${_usr_bin_files[@]}"
+  )
+  for _file in "${_bash_files[@]}"; do \
+    _msg=(
+      "Fixing shebang for"
+      "'${_file}'."
+    )
+    echo \
+      "${_msg[*]}"
+    termux-fix-shebang \
+      "${_file}"
+  done
+}
+
 prepare() {
   local \
+    _bash_files=() \
+    _file \
     _os \
     _src
   _os="$(
@@ -504,8 +547,7 @@ prepare() {
     "COPYING.other" > \
     "Unicode-TOU.txt"
   if [[ "${_os}" == "Android" ]]; then
-    termux-fix-shebang \
-      "./autogen.sh"
+    _android_fix
   fi
   "./autogen.sh"
 }
