@@ -462,30 +462,27 @@ _android_fix() {
     "./autogen.sh"
   mapfile \
     -d \
-    '\n' \
+    $'\0' \
     _bin_files < \
     <(grep \
         -rl \
         '#!/bin' \
-        "${PWD}" || \
+        "." |
+        sed \
+          -e \
+            "s/\n/\0/g" || \
       true)
   mapfile \
     -d \
-    '\n' \
-    _bin_files < \
-    <(grep \
-        -rl \
-        '#!/bin' \
-        "${PWD}" || \
-      true)
-  mapfile \
-    -d \
-    '\n' \
+    $'\0' \
     _usr_bin_files < \
     <(grep \
         -rl \
         '#!/usr/bin' \
-        "${PWD}" || \
+        "." |
+        sed \
+          -e \
+            "s/\n/\0/g" || \
       true)
   _bash_files+=(
     "${_bin_files[@]}"
@@ -503,13 +500,16 @@ _android_fix() {
   done
   mapfile \
     -d \
-    '\n' \
+    $'\0' \
     _makefiles < \
     <(grep \
         -rl \
         -e \
           "\b/bin/sh\b" \
-        "." || \
+        "." |
+        sed \
+          -e \
+            "s/\n/\0/g" || \
       true)
   for _file in "${_makefiles[@]}"; do \
     _msg=(
