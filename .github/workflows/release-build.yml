@@ -976,6 +976,7 @@ jobs:
             pacman \
               -Udd \
               --noconfirm \
+              --overwrite="*" \
               "dogeos-android-libassuan"*".pkg.tar."*
       - name:
           Target specific fig2dev while the CI issue is not solved.
@@ -2282,6 +2283,7 @@ jobs:
           pacman \
             -Udd \
             --noconfirm \
+            --overwrite="*" \
             dogeos-windows-libassuan"*".pkg.tar."*
       - name:
           Installs build dependencies.
