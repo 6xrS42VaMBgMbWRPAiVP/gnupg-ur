@@ -98,7 +98,11 @@ if [[ ! -v "_git_service" ]]; then
   _git_service="github"
 fi
 if [[ ! -v "_docs" ]]; then
-  _docs="false"
+  if [[ "${_os}" == "GNU/Linux" ]]; then
+    _docs="true"
+  else
+    _docs="false"
+  fi
 fi
 _pkg=gnupg
 if [[ ! -v "_git_http" ]]; then
@@ -150,7 +154,7 @@ _2_5_18_commit="1b8362889a522bbcfeb80ef3af61218db216f62b"
 _2_5_18_freepg_commit="756502e158cc2742a956333997037f72ee5ff40f"
 _commit="${_2_5_18_freepg_commit}"
 _libassuan_pkgver="3.0.2"
-pkgrel=81
+pkgrel=82
 _pkgdesc=(
   'Complete and free implementation'
   'of the OpenPGP standard.'
