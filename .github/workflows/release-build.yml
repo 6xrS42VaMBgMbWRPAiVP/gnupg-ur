@@ -976,7 +976,7 @@ jobs:
             pacman \
               -Udd \
               --noconfirm \
-              "${HOME}/dogeos-android-libassuan"*".pkg.tar."*
+              "dogeos-android-libassuan"*".pkg.tar."*
       - name:
           Target specific fig2dev while the CI issue is not solved.
         env:
@@ -995,7 +995,7 @@ jobs:
             pacman \
               -Udd \
               --noconfirm \
-              "${HOME}/dogeos-android-fig2dev"*".pkg.tar."*
+              "dogeos-android-fig2dev"*".pkg.tar."*
       - name:
           Installs build dependencies.
         env:
@@ -2282,7 +2282,7 @@ jobs:
           pacman \
             -Udd \
             --noconfirm \
-            "${HOME}/dogeos-windows-libassuan"*".pkg.tar."*
+            dogeos-windows-libassuan"*".pkg.tar."*
       - name:
           Installs build dependencies.
         env:
