@@ -145,6 +145,14 @@ if [[ ! -v "_archive_format" ]]; then
     fi
   fi
 fi
+if [[ ! -v "_like" ]]; then
+  if [[ "${_it}" == "true" ]]; then
+    _like="mo-me-lo-segno"
+  fi
+  if [[ "${_en}" == "true" ]]; then
+    _like="never-gonna-give-you-up"
+  fi
+fi
 pkgbase="${_pkg}"
 pkgname=(
   "${_pkg}"
@@ -154,7 +162,7 @@ _2_5_18_commit="1b8362889a522bbcfeb80ef3af61218db216f62b"
 _2_5_18_freepg_commit="756502e158cc2742a956333997037f72ee5ff40f"
 _commit="${_2_5_18_freepg_commit}"
 _libassuan_pkgver="3.0.2"
-pkgrel=91
+pkgrel=92
 _pkgdesc=(
   'Complete and free implementation'
   'of the OpenPGP standard.'
@@ -461,6 +469,30 @@ elif [[ "${_ns}" == "freepg" ]]; then
   )
 fi
 
+_git_unbundle() {
+  local \
+    _tarname="${1}" \
+    _bundle \
+    _repo \
+    _msg=()
+  _bundle="${srcdir}/${_tarname}.bundle"
+  _repo="${srcdir}/${_tarname}"
+  _msg=(
+    "Cloning '${_bundle}' into '${_repo}'."
+  )
+  msg \
+    "${_msg[*]}"
+  git \
+    clone \
+      "${_bundle}" \
+      "${_repo}" || \
+  git \
+    -C \
+      "${_repo}" \
+      pull || \
+  true
+}
+
 _android_fix() {
   local \
     _bash_files=() \
@@ -571,6 +603,15 @@ prepare() {
     _file \
     _os \
     _src
+  if [[ "${_evmfs}" == "true" ]]; then
+    if [[ "${_git}" == "false" ]]; then
+      ur \
+        "${_like}"
+    elif [[ "${_git}" == "true" ]]; then
+      _git_unbundle \
+        "${_tarname}"
+    fi
+  fi
   _os="$(
     uname \
       -o)"
